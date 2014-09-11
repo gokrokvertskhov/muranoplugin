@@ -1,0 +1,125 @@
+{
+  parserClass="com.muranoplugin.lex.parser.MuranoParser"
+  parserUtilClass="com.muranoplugin.lex.parser.MuranoParserUtil"
+ // parserUtilClass="com.muranoplugin.lex.parser.MuranoParserUtil"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+
+  psiClassPrefix="MuranoLex"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.muranoplugin.lex.psi"
+  psiImplPackage="com.muranoplugin.lex.psi.impl"
+
+  elementTypeHolderClass="com.muranoplugin.lex.psi.MuranoTypes"
+  elementTypeClass="com.muranoplugin.psi.MuranoElementType"
+  tokenTypeClass="com.muranoplugin.psi.MuranoTokenType"
+
+  tokens=[
+    string="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")"
+    COMMENT_TOKEN='regexp:\s*#[\p[:letter:]\:\$\.\,\(\)\* \t]*'
+    number='regexp:\d+(\.\d*)?'
+    FN_SETATTR_TOKEN="regexp:\$\.setAttr\("
+     FN_GETATTR_TOKEN="regexp:\$\.getAttr\("
+     FN_FIND_TOKEN="regexp:\$\.find\("
+     FN_BIND_TOKEN="regexp:\.bind\("
+     FN_CLASS_TOKEN="regexp:\$\.class\("
+     FN_STRING_TOKEN="regexp:\$\.string\("
+     FN_INT_TOKEN="regexp:\$\.int\("
+     FN_COAL_TOKEN="regexp:coalesce\("
+   NAMESPACE_TOKEN='Namespaces:'
+   NAME_TOKEN="Name:"
+   WORKFLOW_TOKEN="Workflow:"
+   METHODS_TOKEN="Methods:"
+   PARAMETERS_TOKEN="Parameters:"
+   PROPERTIES_TOKEN="regexp:\s*Properties:"
+   EXTENDS_TOKEN="Extends:"
+   CONTRACT_TOKEN="Contract:"
+   ARGUMENTS_TOKEN="Arguments:"
+   DEFAULT_TOKEN="Default:"
+   USAGE_TOKEN="Usage:"
+   USAGE_IN_TOKEN="regexp:\s+In\s+"
+   USAGE_OUT_TOKEN="regexp:\s+Out\s+"
+   USAGE_INOUT_TOKEN="regexp:\s+InOut\s+"
+   USAGE_RUNTIME_TOKEN="regexp:\s+Runtime\s+"
+   RETURN_TOKEN="Return:"
+   IF_TOKEN="regexp:\s*If\:\s*"
+   THEN_TOKEN="regexp:\s*Then\:"
+   ELSE_TOKEN="Else:"
+   BODY_TOKEN="Body:"
+   BOOL_TOKEN_T="True"
+   BOOL_TOKEN_F="False"
+   MPL_BOOL_TRUE="true"
+   MPL_BOOL_FALSE="false"
+   MAP_TOKEN="regexp:\s*=>\s*"
+   INDENT="regexp:\s+\-\s+"
+   //INDENT2="regexp:^\s+"
+   NULL_TOKEN="regexp:\s*null[ \t]*"
+
+
+   //METHOD_CALL2='regexp:\p{Alpha}+\('
+   //BUILT_IN_FUNC='regexp:[\s\(]+\p{Alpha}*\('
+   //LOCAL_VARIABLE='regexp:\$\w*'
+   DOLLAR_TOKEN="$"
+   //PROPERTY_VARIABLE='regexp:\$\.'
+
+
+   /*FQDN='regexp:\w[\p{Alpha}]+\.+[\p{Alpha}\.]+' */
+   DEFAULTNS_TOKEN='regexp:\s+\=\:\s+'
+   ASSIGN_TOKEN='regexp:\s*\:[ \t]*'
+
+   LPAREN_TOKEN="regexp:\s*\(\s*"
+   RPAREN_TOKEN="regexp:\s*\)"
+
+   LBRAKETS_TOKEN="regexp:\s*\{\s*"
+   RBRAKETS_TOKEN="regexp:\s*\}"
+
+   LSQBR_TOKEN="regexp:\s*\[\s*"
+   RSQBR_TOKEN="regexp:\s*\]"
+
+   OP_PLUS="regexp:\s*\+\s*"
+   OP_MINUS="regexp:\s*\-m\s*"
+   OP_MULT="regexp:\s*\*\s*"
+   OP_DIV="regexp:\s*/\s*"
+   COMMA_TOKEN="regexp:\s*,\s*"
+   NEWLINE="regexp:\n"
+   DOT_TOKEN="."
+   OP_AND="regexp:\s*and\s*"
+   OP_OR="regexp:\s*or\s*"
+   OP_NEG="!"
+   OP_EQ="regexp:\s*\=\s*"
+   OP_NOT="regexp:\s*not\s*"
+   OP_LS='regexp:\s*\<\s*'
+   OP_LE="regexp:\s*\<\=\s*"
+   OP_GR='regexp:\s*\>\s*'
+   OP_GE="regexp:\s*\>\=\s*"
+   OP_NE="regexp:\s*\!\=\s*"
+   OP_N="regexp:\s*\!\s*"
+// Built-in functions tokens
+   FN_NEW_TOKEN="regexp:\s*new"
+   FN_FORMAT_TOKEN="regexp:\s*format"
+   FN_DICT_TOKEN="regexp:\s*dict"
+
+//Heat
+
+  HRESOURCES_TOKEN="regexp:\s+resources\:\s*"
+  HTYPE_TOKEN="regexp:\stype\:\s*"
+  HPROPERTIES_TOKEN="regexp:\s*properties\:\s*"
+  HOUTPUTS_TOKEN="regexp:\s+outputs\:\s*"
+  HVALUE_TOKEN="regexp:\s+value\:\s+"
+
+  //
+  VARIABLE_TOKEN="regexp:\$\w*"
+  PROPERTY_TOKEN="regexp:\$\.\w*"
+  METHOD_CALL_TOKEN="regexp:\$*\.\w*\("
+  CLASS_NS_TOKEN="regexp:\w*\:\w*"
+  SUBITEM_TOKEN="regexp:\.\w*"
+
+
+
+  ID='regexp:[\p[:letter:]\_]*'
+  ]
+}
+
+root ::=  rootElement  { pin=1 }
+rootElement ::= FN_INT_TOKEN

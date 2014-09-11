@@ -1,0 +1,445 @@
+{
+  parserClass="com.muranoplugin.parser.MuranoParser"
+  parserUtilClass="com.muranoplugin.parser.MuranoParserUtil"
+  //parserUtilClass="com.muranoplugin.parser.MuranoParserUtil"
+  psiImplUtilClass="com.muranoplugin.psi.MuranoPsiImplUtil"
+  //parserUtilClass="com.muranoplugin.parser.MuranoParserUtil"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+  extends(".*(Expression|Literal)")="expression"
+
+  psiClassPrefix="Murano"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.muranoplugin.psi"
+  psiImplPackage="com.muranoplugin.psi.impl"
+
+  elementTypeHolderClass="com.muranoplugin.psi.MuranoTypes"
+  elementTypeClass="com.muranoplugin.psi.MuranoElementType"
+  tokenTypeClass="com.muranoplugin.psi.MuranoTokenType"
+
+  tokens=[
+    string="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")"
+    COMMENT_TOKEN='regexp:\s*#[\w \t]*'
+    number='regexp:\d+(\.\d*)?'
+   NAMESPACE_TOKEN='Namespaces:'
+   NAME_TOKEN="Name:"
+   WORKFLOW_TOKEN="Workflow:"
+   METHODS_TOKEN="Methods:"
+   PARAMETERS_TOKEN="Parameters:"
+   PROPERTIES_TOKEN="regexp:\s*Properties:"
+   EXTENDS_TOKEN="Extends:"
+   CONTRACT_TOKEN="Contract:"
+   ARGUMENTS_TOKEN="Arguments:"
+   DEFAULT_TOKEN="Default:"
+   USAGE_TOKEN="Usage:"
+   USAGE_IN_TOKEN="regexp:\s+In\s+"
+   USAGE_OUT_TOKEN="regexp:\s+Out\s+"
+   USAGE_INOUT_TOKEN="regexp:\s+InOut\s+"
+   USAGE_RUNTIME_TOKEN="regexp:\s+Runtime\s+"
+   RETURN_TOKEN="Return:"
+   IF_TOKEN="regexp:\s*If\:\s*"
+   THEN_TOKEN="regexp:\s*Then\:"
+   ELSE_TOKEN="Else:"
+   BODY_TOKEN="Body:"
+   BOOL_TOKEN_T="True"
+   BOOL_TOKEN_F="False"
+   MPL_BOOL_TRUE="true"
+   MPL_BOOL_FALSE="false"
+   MAP_TOKEN="regexp:\s*=>\s*"
+   INDENT="regexp:^\s+\-\s+"
+   //INDENT2="regexp:^\s+"
+   NULL_TOKEN="regexp:\s*null[ \t]*"
+
+
+   //METHOD_CALL2='regexp:\p{Alpha}+\('
+   //BUILT_IN_FUNC='regexp:[\s\(]+\p{Alpha}*\('
+   //LOCAL_VARIABLE='regexp:\$\w*'
+   DOLLAR_TOKEN="$"
+   //PROPERTY_VARIABLE='regexp:\$\.'
+
+
+   /*FQDN='regexp:\w[\p{Alpha}]+\.+[\p{Alpha}\.]+' */
+   DEFAULTNS_TOKEN='regexp:\s+\=\:\s+'
+   ASSIGN_TOKEN='regexp:\s*\:[ \t]*'
+
+   LPAREN_TOKEN="regexp:\s*\(\s*"
+   RPAREN_TOKEN="regexp:\s*\)"
+
+   LBRAKETS_TOKEN="regexp:\s*\{\s*"
+   RBRAKETS_TOKEN="regexp:\s*\}"
+
+   LSQBR_TOKEN="regexp:\s*\[\s*"
+   RSQBR_TOKEN="regexp:\s*\]"
+
+   OP_PLUS="regexp:\s*\+\s*"
+   OP_MINUS="regexp:\s*\-m\s*"
+   OP_MULT="regexp:\s*\*\s*"
+   OP_DIV="regexp:\s*/\s*"
+   COMMA_TOKEN="regexp:\s*,\s*"
+   NEWLINE="regexp:\n"
+   DOT_TOKEN="."
+   OP_AND="regexp:\s*and\s*"
+   OP_OR="regexp:\s*or\s*"
+   OP_NEG="!"
+   OP_EQ="regexp:\s*\=\s*"
+   OP_NOT="regexp:\s*not\s*"
+   OP_LS='regexp:\s*\<\s*'
+   OP_LE="regexp:\s*\<\=\s*"
+   OP_GR='regexp:\s*\>\s*'
+   OP_GE="regexp:\s*\>\=\s*"
+   OP_NE="regexp:\s*\!\=\s*"
+   OP_N="regexp:\s*\!\s*"
+// Built-in functions tokens
+   FN_NEW_TOKEN="regexp:\s*new"
+   FN_FORMAT_TOKEN="regexp:\s*format"
+   FN_DICT_TOKEN="regexp:\s*dict"
+
+//Heat
+
+  HRESOURCES_TOKEN="regexp:\s+resources\:\s*"
+  HTYPE_TOKEN="regexp:\stype\:\s*"
+  HPROPERTIES_TOKEN="regexp:\s*properties\:\s*"
+  HOUTPUTS_TOKEN="regexp:\s+outputs\:\s*"
+  HVALUE_TOKEN="regexp:\s+value\:\s+"
+
+  ID='regexp:[\p{Alpha}\_]*'
+  EOF="EOF"
+  ]
+
+}
+
+root ::=  muranopl
+
+muranoplStatement ::= namespacesStatement | classStatement | commentStatement
+muranopl ::= muranoplStatement muranopl | (muranoplStatement | EOF) |
+body ::= statement body | statement?
+
+non_list_body ::= non_list_statememnt non_list_body | //Only for Heat resources
+
+statement ::= (INDENT (returnExpression| conditionalStatement | assignmentStatement | method_callExpression )) | commentStatement {
+ /* check_indent */
+ methods=[ setIndent
+           checkIndent
+ ]
+ }
+commentStatement ::= COMMENT_TOKEN
+non_list_statememnt ::= ( heatExpression|
+                        heatSimpleStatement  |  //Only for Heat resources
+                        heatValueStatement|
+                        heatPropertyNameSatement |
+                        heatAssignmentStatement |
+                        method_callExpression|)
+
+heatSimpleStatement ::= lvalue ASSIGN_TOKEN | ID ASSIGN_TOKEN
+
+conditionalStatement ::= IF_TOKEN expression THEN_TOKEN body (ELSE_TOKEN body)?{ /* ++indent */ }
+
+assignmentStatement ::= lvalue ASSIGN_TOKEN expression {
+mixin="com.muranoplugin.psi.impl.MuranoAssignMixin"
+}
+heatAssignmentStatement ::= ID ASSIGN_TOKEN expression
+heatPropertyNameSatement ::= method_callExpression ASSIGN_TOKEN
+heatValueStatement ::= HVALUE_TOKEN non_list_body
+returnExpression ::= RETURN_TOKEN expression
+
+
+lvalue ::= variable | this_property
+
+variable ::= DOLLAR_TOKEN ID sub_property {methods=[getName]}
+this_property ::= DOLLAR_TOKEN DOT_TOKEN ID sub_property {
+  methods=[getName]
+ /* sub_property will return collection of IDs. Here we need to append ID */ }
+
+sub_property ::= DOT_TOKEN (ID | FN_FORMAT_TOKEN) sub_property | { /* append ID */}
+namepsaced_class ::=ID ASSIGN_TOKEN ID
+
+expression ::= unaryExpression| binaryExpression | indexedExpression| values
+
+private numberLiteralExpression ::= NUMBER | NULL_TOKEN
+private booleanLiteralExpression ::= MPL_BOOL_TRUE | MPL_BOOL_FALSE | muranoPLBooleans
+private muranoPLBooleans ::= BOOL_TOKEN_T | BOOL_TOKEN_F
+private textLiteralExpression ::= STRING
+private literals ::= numberLiteralExpression | booleanLiteralExpression | textLiteralExpression
+private values ::= mapEntryElement|
+                   arrayExpression|
+                   parenthesizedExpression|
+                   braketedExpression |
+                   method_callExpression|
+                   heatExpression |
+                   this_property |
+                   variable |
+                   composedObjectStatement |
+                   ID ASSIGN_TOKEN ID |
+                   literals | ID
+method_callExpression ::= (this_property | variable | function_name) LPAREN_TOKEN expr_list RPAREN_TOKEN sub_method  {pin=2
+methods=[
+  getArgsCount
+  getArgs
+  getName
+]
+}
+
+function_name ::= builtin_functions | ID
+
+private builtin_functions ::= FN_NEW_TOKEN | FN_FORMAT_TOKEN |FN_DICT_TOKEN
+
+sub_method ::= DOT_TOKEN ID sub_property LPAREN_TOKEN expr_list? RPAREN_TOKEN sub_method | DOT_TOKEN ID sub_property LPAREN_TOKEN expr_list? RPAREN_TOKEN |
+
+expr_list ::= (expression | ID) COMMA_TOKEN expr_list | expression |
+composedObjectStatement ::= INDENT composedObjects
+composedObject ::= ID ASSIGN_TOKEN (literals | lvalue)
+composedObjects ::= composedObject composedObjects | composedObject |
+
+//Operators
+binary_operations ::= OP_PLUS | OP_MINUS | OP_MULT | OP_DIV | OP_AND | OP_OR| OP_EQ|
+                       OP_LS|
+                       OP_LE|
+                       OP_GR|
+                       OP_GE|
+                       OP_NE
+                       { name="operator" }
+
+binaryExpression ::= values binary_operations expression
+
+
+private unaryOperator ::=  OP_NOT | OP_N
+unaryExpression ::= unaryOperator expression
+
+
+// Brackets
+parenthesizedExpression ::= LPAREN_TOKEN expression RPAREN_TOKEN { pin=1 }
+
+braketedExpression ::=  LBRAKETS_TOKEN non_list_body  RBRAKETS_TOKEN { pin=1}
+arrayExpression ::= LSQBR_TOKEN expr_list RSQBR_TOKEN { pin=1 }
+
+indexedExpression ::= values  '[' expression ']' {
+  methods=[
+    indexExpression="expression[1]"
+  ]
+  pin=2
+}
+
+//Mappings
+mapExpression ::= mapEntryElement COMMA_TOKEN mapExpression | mapEntryElement |
+mapEntryElement ::= ID  MAP_TOKEN  expression {
+ methods=[
+     keyExpression="expression[0]"
+     valueExpression="expression[1]"
+  ]
+  name="map entry"
+  pin=2
+}
+
+// HEAT declarations
+
+private heatExpression ::= resourcesExpression | typeExpression | heatPropertiesExpression | heatOutputsExpression
+resourcesExpression ::= HRESOURCES_TOKEN non_list_body
+typeExpression ::= HTYPE_TOKEN STRING
+heatPropertiesExpression ::= HPROPERTIES_TOKEN non_list_body
+heatOutputsExpression ::= HOUTPUTS_TOKEN non_list_body
+
+// MuranoPL structures
+
+namespacesStatement ::= NAMESPACE_TOKEN  namespaceItems
+namespaceItem::=  (ID ASSIGN_TOKEN | DEFAULTNS_TOKEN)   fqdn
+namespaceItems ::=  namespaceItem namespaceItems | namespaceItem |
+fqdn ::=  ID ('.' ID)*
+
+classStatement ::=NAME_TOKEN fqdn classBodyItems {
+  mixin="com.muranoplugin.psi.impl.MuranoClassMixin"
+}
+classBodyItems ::= classBody classBodyItems | classBody |
+classBody ::= extendsStatement | propertiesStatement | workflowsStatement | commentStatement
+
+extendsStatement ::= EXTENDS_TOKEN (ID ASSIGN_TOKEN ID|fqdn )
+
+propertiesStatement ::=PROPERTIES_TOKEN  propertiesItems
+propertyItem ::=ID ASSIGN_TOKEN propertyItemElems {
+  mixin="com.muranoplugin.psi.impl.MuranoPropertyMixin"
+  methods=[getKey getValue getUsage]
+  }
+
+propertyItemElem ::= contractStatement | defaultStatement | usageStatement |
+propertyItemElems ::= propertyItemElem propertyItemElems | propertyItemElem
+propertiesItems ::= propertyItem propertiesItems | propertyItem |
+contractStatement ::= CONTRACT_TOKEN expression
+defaultStatement ::= DEFAULT_TOKEN expression
+usageStatement ::= USAGE_TOKEN (USAGE_IN_TOKEN |
+                                USAGE_OUT_TOKEN|
+                                USAGE_INOUT_TOKEN |
+                                USAGE_RUNTIME_TOKEN)
+
+workflowsStatement ::= (WORKFLOW_TOKEN|METHODS_TOKEN) methodItems
+methodItem ::=ID ASSIGN_TOKEN methodComponents {
+  mixin="com.muranoplugin.psi.impl.MuranoMethodMixin"
+  methods=[getName="ID[0]"]
+}
+methodComponent ::= argumentsStatement | bodyStatement
+methodComponents ::=methodComponent methodComponents | methodComponent |
+methodItems ::= methodItem methodItems | methodItem |
+
+argumentsStatement ::= ARGUMENTS_TOKEN propertiesItems
+
+bodyStatement ::= BODY_TOKEN body
+
+
+/*
+private numberLiteralExpression ::= NUMBER
+private booleanLiteralExpression ::= MPL_BOOL_TRUE | MPL_BOOL_FALSE
+private textLiteralExpression ::= STRING | CHARACTER
+
+expression_ ::= sequenceExpression |
+               methodCallExpression|
+               parenthesizedExpression |
+               variableAssignmentExpression|
+               binaryExpression |
+               referenceExpression |
+               indexedExpression |
+               propertyExpression |
+               conditionalExpression|
+               unaryExpression|
+               mapExpression|
+               boolExpression|
+               getAttrExpression|
+               setAttrExpression|
+               coalesceExpression|
+               formatExpression|
+               sequencedCallExpression|
+               classReferenceExpression|
+               thisExpression|
+               literalExpression
+
+
+
+literalExpression ::= numberLiteralExpression |
+                      textLiteralExpression |
+                      booleanLiteralExpression |
+                      "null" {
+  methods=[
+    getConstantValue
+  ]
+}
+referenceExpression ::= (local_variable | property_variable ) ('.' ID)*
+thisExpression ::= VARIABLE
+local_variable ::= VARIABLE ID //$ID
+property_variable ::= VARIABLE '.' ID // $.ID
+classReferenceExpression ::= ID ':' ID
+
+
+variableAssignmentExpression ::= LIST_ELEM_TOKEN  (referenceExpression)  ASSIGNMENT SPACE* expression SPACE*{
+  methods=[assignment="expression"]
+  pin=3
+}
+
+// Method Call expressions
+private methodCallParameters ::= expression? (',' expression)*
+expressionsList ::= expression OP_COMMA expressionsList | expression |
+methodCallExpression ::= LIST_ELEM_TOKEN?  (VARIABLE ID '.' ID | VARIABLE ('.' ID)+ ) '(' expressionsList ')' sequentialMethodCalls {
+  methods=[
+    method="expression[0]"
+    getParameterCount
+    ]
+ pin(".*")="'\('"
+}
+
+sequentialMethodCalls ::= ('.' ID)+ '(' methodCallParameters ')' sequentialMethodCalls |
+
+propertyExpression ::= methodCallExpression('.'ID)+
+sequencedCallExpression ::= methodCallExpression* '.' ID
+private expressionSequenceRequired ::= expression (',' expression)+  { pin(".*")=1 }
+sequenceExpression ::= '{' expressionSequenceRequired '}' { pin=1 }
+parenthesizedExpression ::= '(' expression ')' { pin=1 }
+
+// Binary Operations
+// Relational Ops
+private relationalOperations ::= '<'  | "<="  | '>'  | ">=" | "!="
+binary_ops ::= OP_PLUS | OP_MINUS | OP_MUL | OP_DIV | OP_AND | OP_OR |
+ relationalOperations
+binaryExpression ::= expression binary_ops expression {
+ methods=[
+    left="expression[0]"
+    right="expression[1]"
+    getOperator
+  ]
+}
+
+
+// Unary Ops
+private unaryOperator ::= '+' | '-' | "not"
+unaryExpression ::= unaryOperator SPACE* expression {
+  methods=[
+    getUnaryOperator
+  ]
+}
+// Indexes Expressions
+
+indexedExpression ::= referenceExpression  '[' expression ']' {
+  methods=[
+    indexExpression="expression[1]"
+  ]
+  pin=2
+}
+
+//Maps Expressions
+mapEntryElement ::= ID SPACE* '=>' SPACE* expression {
+ methods=[
+     keyExpression="expression[0]"
+     valueExpression="expression[1]"
+  ]
+  name="map entry"
+  pin=2
+}
+private mapExpressionSequence ::= mapEntryElement (',' mapEntryElement)*
+
+mapExpression ::= ('dict(') mapExpressionSequence ')' {
+  methods=[
+    mapType="expression"
+  ]
+  pin=1
+}
+
+// Heat resources embeded
+
+
+// Conditional Expression
+
+conditionalExpression ::= LIST_ELEM_TOKEN IF_TOKEN SPACE* expression SPACE* THEN_TOKEN expression+ (ELSE_TOKEN expression*)? {
+  methods=[
+  condition="expression[0]"
+  then="expression[1]"
+  else="expression[2]"
+  ]
+}
+//Built-In functions
+boolExpression ::='bool' LEFT_PAREN SPACE* expression RIGHT_PAREN {pin=1}
+getAttrExpression ::="$.getAttr" LEFT_PAREN SPACE* ID (',' expression)? RIGHT_PAREN {pin=1}
+setAttrExpression ::=LIST_ELEM_TOKEN "$.setAttr" LEFT_PAREN SPACE* ID (',' expression)? RIGHT_PAREN {pin=1}
+coalesceExpression ::= "coalesce" LEFT_PAREN expressionsList RIGHT_PAREN {pin=1}
+formatExpression ::= "format" LEFT_PAREN  expressionsList RIGHT_PAREN {pin=1}
+
+// Murano MPL structures
+statements ::= namespace_stmt | name_stmt| COMMENT
+keyword ::= ID ASSIGNMENT
+fqdn ::=  ID ('.' ID)*
+
+//Namespace declarations
+namespace_stmt ::= NAMESPACE_TOKEN  namespace_item*
+namespace_item ::= INDENT (DEFAULT_NS | keyword)  fqdn
+
+//Class definitions
+name_stmt ::= NAME_TOKEN  (fqdn | ID)  class_body
+class_body ::= (property_stmt | workflows_stmt | extends_stmt)*
+extends_stmt ::= EXTENDS_TOKEN SPACE+ class_item
+class_item ::= (keyword? fqdn) | (keyword ID)
+property_stmt ::= PROPERTIES_TOKEN property_items*
+property_items ::= keyword (contract_stmt)
+contract_stmt ::= CONTRACT_TOKEN SPACE+ expression
+
+workflows_stmt ::= WORKFLOW_TOKEN methods_items*
+methods_items ::= keyword (arguments_stmt | body_stmt)*
+arguments_stmt ::= ARGUMENTS_TOKEN property_items*
+
+body_stmt ::= BODY_TOKEN SPACE* body_item+
+body_item ::= expression*
+
+*/

@@ -1,0 +1,47 @@
+<idea-plugin version="2">
+  <id>com.yourcompany.unique.plugin.id</id>
+  <name>MuranoPL DSL</name>
+  <version>1.0</version>
+  <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+
+  <description><![CDATA[
+      Syntax highlighting for MuranoPL<br>
+      <em>DSL</em>
+    ]]></description>
+
+  <change-notes><![CDATA[
+      Initial version.<br>
+    ]]>
+  </change-notes>
+
+  <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
+  <idea-version since-build="128.18"/>
+
+  <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
+       on how to target different products -->
+
+  <depends>com.intellij.modules.lang</depends>
+
+
+  <extensions defaultExtensionNs="com.intellij">
+
+      <fileTypeFactory implementation="com.muranoplugin.MuranoFileTypeFactory"/>
+      <lang.parserDefinition language="MuranoPL" implementationClass="com.muranoplugin.MuranoParserDefinition"/>
+      <lang.syntaxHighlighterFactory key="MuranoPL" implementationClass="com.muranoplugin.MuranoSyntaxHighlighterFactory"/>
+      <colorSettingsPage implementation="com.muranoplugin.MuranoColorSettingsPage"/>
+      <annotator language="MuranoPL" implementationClass="com.muranoplugin.MuranoPLAnnotator"/>
+  </extensions>
+
+  <application-components>
+    <!-- Add your application components here -->
+  </application-components>
+
+  <project-components>
+    <!-- Add your project components here -->
+  </project-components>
+
+  <actions>
+    <!-- Add your actions here -->
+  </actions>
+
+</idea-plugin>

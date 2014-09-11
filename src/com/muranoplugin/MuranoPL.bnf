@@ -1,0 +1,123 @@
+
+{
+  parserClass="com.muranoplugin.parser.MuranoParser"
+  parserUtilClass="com.muranoplugin.parser.MuranoParserUtil"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Murano"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.muranoplugin.psi"
+  psiImplPackage="com.muranoplugin.psi.impl"
+
+  elementTypeHolderClass="com.muranoplugin.lex.psi.MuranoTypes"
+  elementTypeClass="com.muranoplugin.psi.MuranoElementType"
+  tokenTypeClass="com.muranoplugin.psi.MuranoTokenType"
+
+  tokens=[
+    string="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")"
+    comment='regexp:#.*'
+    number='regexp:\d+(\.\d*)?'
+   NAMESPACE_TOKEN='Namespaces:'
+   NAME_TOKEN="Name:"
+   WORKFLOW_TOKEN="Workflow:"
+   PARAMETERS_TOKEN="Parameters:"
+   PROPERTIES_TOKEN="Properties:"
+   EXTENDS_TOKEN="Extends:"
+   CONTRACT_TOKEN="Contract:"
+   ARGUMENTS_TOKEN="Arguments:"
+   IF_TOKEN="If:"
+   THEN_TOKEN="Then:"
+   ELSE_TOKEN="Else:"
+   BODY_TOKEN="Body:"
+   BOOL_TOKEN_T="True"
+   BOOL_TOKEN_F="False"
+   MPL_BOOL_TRUE="true"
+   MPL_BOOL_FALSE="false"
+   ASSOCIATION_TOKEN="=>"
+   DICT_TOKEN="dict"
+
+
+   METHOD_CALL2='regexp:\p{Alpha}+\('
+   BUILT_IN_FUNC='regexp:[\s\(]+\p{Alpha}*\('
+   LOCAL_VARIABLE='regexp:\$\w*'
+   PROPERTY_VARIABLE='regexp:\$\.'
+
+
+   /*FQDN='regexp:\w[\p{Alpha}]+\.+[\p{Alpha}\.]+' */
+   DEFAULT_NS='regexp:(\=\:)'
+   LIST_ELEM_TOKEN='regexp:\-\s+'
+   ASSIGNMENT='regexp:\:'
+
+   LEFT_PAREN="("
+   RIGHT_PAREN=")"
+   OP_PLUS="+"
+   OP_MINUS="-"
+   OP_MULT="*"
+   OP_DIV="/"
+   OP_COMMA="regexp:\s*,\s*"
+   SPACE='regexp:\s'
+   NEWLINE="regexp:\n"
+   OP_DOT="."
+   OP_AND="and"
+   OP_OR="or"
+   OP_NEG="!"
+   OP_EQ="="
+   OP_NOT="not"
+
+   ID='regexp:[\p{Alpha}\_]*'
+  ]
+
+}
+suite ::= statements*
+statements ::= (namespace_stmt | name_stmt| COMMENT)
+namespace_stmt ::= NAMESPACE_TOKEN  namespace_item*
+namespace_item ::= SPACE* (DEFAULT_NS | keyword) SPACE fqdn
+keyword ::= ID ':'
+fqdn ::=  ID ('.' ID)*
+
+name_stmt ::= NAME_TOKEN SPACE (fqdn | ID)  class_body
+class_body ::= (property_stmt | workflows_stmt | extends_stmt)*
+extends_stmt ::= EXTENDS_TOKEN SPACE+ class_item
+class_item ::= (keyword? fqdn) | (keyword ID)
+property_stmt ::= PROPERTIES_TOKEN property_items*
+property_items ::= keyword (contract_stmt)
+contract_stmt ::= CONTRACT_TOKEN SPACE+ function+
+
+workflows_stmt ::= WORKFLOW_TOKEN methods_items*
+methods_items ::= keyword (arguments_stmt | body_stmt)*
+arguments_stmt ::= ARGUMENTS_TOKEN property_items*
+body_stmt ::= BODY_TOKEN body_item*
+body_item ::= LIST_ELEM_TOKEN expr
+
+expr ::= ( assign_expr | eval_expr)
+assign_expr ::= (LOCAL_VARIABLE | PROPERTY_VARIABLE ID) ASSIGNMENT space* (primitive_type | eval_expr)
+eval_expr ::= (function+| '.' ID| if_stmt | eval_ops_expr| '.' eval_expr | func_call)*
+primitive_type ::= (STRING | NUMBER| list | BOOLEAN | dict_type)
+dict_type ::=DICT_TOKEN LEFT_PAREN dict_args? RIGHT_PAREN
+dict_args ::= (((named_arg)| ',') | space)*
+
+function ::= ((multiple_prop | LOCAL_VARIABLE| PROPERTY_VARIABLE)*('.'ID)?'.'? (METHOD_CALL | METHOD_CALL2 | BUILT_IN_FUNC) args RIGHT_PAREN)
+func_call ::= METHOD_CALL2 args RIGHT_PAREN
+
+args ::= arg | arg OP_COMMA args |
+arg ::= (eval_ops_expr| (keyword ID) | FQDN | LOCAL_VARIABLE | PROPERTY_VARIABLE | STRING | MPL_BOOLEAN | ID | function ) | named_arg
+right_expr ::= (LOCAL_VARIABLE | PROPERTY_VARIABLE | primitive_type | eval_ops_expr)
+named_arg ::= ID space ASSOCIATION_TOKEN space right_expr
+list ::= LIST_ELEM_TOKEN list_elem*
+list_elem ::= KEYWORD space (NUMBER | STRING| BOOLEAN)
+BOOLEAN ::= (BOOL_TOKEN_T | BOOL_TOKEN_F)
+MPL_BOOLEAN ::= (MPL_BOOL_TRUE | MPL_BOOL_FALSE)
+private space ::= ' '
+multiple_prop ::= PROPERTY_VARIABLE ('.'ID)?
+if_stmt ::= IF_TOKEN SPACE if_condition  THEN_TOKEN if_block_elem ELSE_TOKEN? if_block_elem?
+if_condition ::= logical_op? SPACE* (expr logical_op expr?)*
+
+logical_op ::=OP_AND | OP_OR | OP_NEG | OP_EQ | OP_NOT
+
+if_block_elem ::= LIST_ELEM_TOKEN expr
+operators ::= (OP_PLUS | OP_MINUS | OP_MULT | OP_DIV)
+eval_ops_expr ::= ((LOCAL_VARIABLE | multiple_prop | paren_expr | primitive_type) space? oper space?) oper?
+left oper ::= operators space? primary_inner
+private primary_inner ::= LOCAL_VARIABLE | multiple_prop | paren_expr | primitive_type
+paren_expr ::= '(' eval_ops_expr ')' {pin=1}
