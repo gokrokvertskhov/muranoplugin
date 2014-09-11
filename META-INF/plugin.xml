@@ -1,16 +1,16 @@
 <idea-plugin version="2">
-  <id>com.yourcompany.unique.plugin.id</id>
+  <id>com.mirantis.murano.plugin</id>
   <name>MuranoPL DSL</name>
-  <version>1.0</version>
-  <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+  <version>0.2</version>
+  <vendor email="" url="http://mirantis.com">Mirantis Inc.</vendor>
 
   <description><![CDATA[
-      Syntax highlighting for MuranoPL<br>
+      Syntax highlighting for MuranoPL
       <em>DSL</em>
     ]]></description>
 
   <change-notes><![CDATA[
-      Initial version.<br>
+      Initial version.
     ]]>
   </change-notes>
 
@@ -30,6 +30,7 @@
       <lang.syntaxHighlighterFactory key="MuranoPL" implementationClass="com.muranoplugin.MuranoSyntaxHighlighterFactory"/>
       <colorSettingsPage implementation="com.muranoplugin.MuranoColorSettingsPage"/>
       <annotator language="MuranoPL" implementationClass="com.muranoplugin.MuranoPLAnnotator"/>
+      <completion.contributor language="MuranoPL" implementationClass="com.muranoplugin.MuranoCodeCompletitionContributor"/>
   </extensions>
 
   <application-components>

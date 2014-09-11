@@ -9,7 +9,16 @@ import java.util.Set;
  * Created by gokrokve on 9/10/14.
  */
 public class MuranoClassObject {
+    public Set<String> getProperties() {
+        return properties;
+    }
+
     Set<String> properties = new HashSet<String>();
+
+    public Map<String, MuranoMethodObject> getMethods() {
+        return methods;
+    }
+
     Map<String, MuranoMethodObject> methods = new HashMap<String, MuranoMethodObject>();
 
     public MuranoClassObject() {

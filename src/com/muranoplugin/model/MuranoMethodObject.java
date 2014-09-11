@@ -7,6 +7,10 @@ import java.util.Set;
  * Created by gokrokve on 9/10/14.
  */
 public class MuranoMethodObject {
+    public Set<String> getVariables() {
+        return variables;
+    }
+
     private  Set<String> variables = new HashSet<String>();
 
     public MuranoMethodObject() {
@@ -24,6 +28,7 @@ public class MuranoMethodObject {
     public Boolean hasVariable(String var){
         return this.variables.contains(var);
     }
+
 
 
 }
