@@ -28,6 +28,7 @@ public class MuranoClassObject {
         this.addMethod("string");
         this.addMethod("int");
         this.addMethod("class");
+        this.addProperty("environment");
     }
 
     public Boolean hasMethod(String method){

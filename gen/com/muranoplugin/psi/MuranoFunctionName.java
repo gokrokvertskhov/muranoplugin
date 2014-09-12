@@ -14,6 +14,9 @@ public interface MuranoFunctionName extends PsiElement {
   PsiElement getFnFormatToken();
 
   @Nullable
+  PsiElement getFnJoinToken();
+
+  @Nullable
   PsiElement getFnNewToken();
 
   @Nullable

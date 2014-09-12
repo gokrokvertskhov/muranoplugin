@@ -21,7 +21,13 @@ public interface MuranoStatement extends PsiElement {
   MuranoExpression getExpression();
 
   @Nullable
+  MuranoForStatement getForStatement();
+
+  @Nullable
   PsiElement getIndent();
+
+  @Nullable
+  PsiElement getNewline();
 
   void setIndent();
 

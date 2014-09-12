@@ -91,6 +91,10 @@ public class MuranoVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitForStatement(@NotNull MuranoForStatement o) {
+    visitPsiElement(o);
+  }
+
   public void visitFqdn(@NotNull MuranoFqdn o) {
     visitPsiElement(o);
   }
@@ -127,6 +131,14 @@ public class MuranoVisitor extends PsiElementVisitor {
     visitExpression(o);
   }
 
+  public void visitListElem(@NotNull MuranoListElem o) {
+    visitPsiElement(o);
+  }
+
+  public void visitListOfExpr(@NotNull MuranoListOfExpr o) {
+    visitPsiElement(o);
+  }
+
   public void visitLvalue(@NotNull MuranoLvalue o) {
     visitPsiElement(o);
   }
@@ -152,6 +164,10 @@ public class MuranoVisitor extends PsiElementVisitor {
   }
 
   public void visitMethodItems(@NotNull MuranoMethodItems o) {
+    visitPsiElement(o);
+  }
+
+  public void visitMethodUsageStatement(@NotNull MuranoMethodUsageStatement o) {
     visitPsiElement(o);
   }
 

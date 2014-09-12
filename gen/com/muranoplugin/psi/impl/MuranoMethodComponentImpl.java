@@ -34,4 +34,10 @@ public class MuranoMethodComponentImpl extends ASTWrapperPsiElement implements M
     return findChildByClass(MuranoBodyStatement.class);
   }
 
+  @Override
+  @Nullable
+  public MuranoMethodUsageStatement getMethodUsageStatement() {
+    return findChildByClass(MuranoMethodUsageStatement.class);
+  }
+
 }

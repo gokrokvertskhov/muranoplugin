@@ -7,7 +7,10 @@ import com.intellij.psi.PsiElement;
 
 public interface MuranoContractStatement extends PsiElement {
 
-  @NotNull
+  @Nullable
   MuranoExpression getExpression();
+
+  @Nullable
+  MuranoListOfExpr getListOfExpr();
 
 }

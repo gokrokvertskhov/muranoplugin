@@ -12,6 +12,7 @@ public interface MuranoTypes {
 
   IElementType ROOT_ELEMENT = new MuranoElementType("ROOT_ELEMENT");
 
+  IElementType ACTION_TOKEN = new MuranoTokenType("Action");
   IElementType ARGUMENTS_TOKEN = new MuranoTokenType("Arguments:");
   IElementType ASSIGN_TOKEN = new MuranoTokenType("ASSIGN_TOKEN");
   IElementType BODY_TOKEN = new MuranoTokenType("Body:");
@@ -25,6 +26,7 @@ public interface MuranoTypes {
   IElementType DEFAULT_TOKEN = new MuranoTokenType("Default:");
   IElementType DOLLAR_TOKEN = new MuranoTokenType("$");
   IElementType DOT_TOKEN = new MuranoTokenType(".");
+  IElementType DO_TOKEN = new MuranoTokenType("DO_TOKEN");
   IElementType ELSE_TOKEN = new MuranoTokenType("Else:");
   IElementType EXTENDS_TOKEN = new MuranoTokenType("Extends:");
   IElementType FN_BIND_TOKEN = new MuranoTokenType("FN_BIND_TOKEN");
@@ -38,6 +40,7 @@ public interface MuranoTypes {
   IElementType FN_NEW_TOKEN = new MuranoTokenType("FN_NEW_TOKEN");
   IElementType FN_SETATTR_TOKEN = new MuranoTokenType("FN_SETATTR_TOKEN");
   IElementType FN_STRING_TOKEN = new MuranoTokenType("FN_STRING_TOKEN");
+  IElementType FOR_TOKEN = new MuranoTokenType("FOR_TOKEN");
   IElementType HOUTPUTS_TOKEN = new MuranoTokenType("HOUTPUTS_TOKEN");
   IElementType HPROPERTIES_TOKEN = new MuranoTokenType("HPROPERTIES_TOKEN");
   IElementType HRESOURCES_TOKEN = new MuranoTokenType("HRESOURCES_TOKEN");
@@ -46,6 +49,7 @@ public interface MuranoTypes {
   IElementType ID = new MuranoTokenType("ID");
   IElementType IF_TOKEN = new MuranoTokenType("IF_TOKEN");
   IElementType INDENT = new MuranoTokenType("INDENT");
+  IElementType IN_TOKEN = new MuranoTokenType("IN_TOKEN");
   IElementType LBRAKETS_TOKEN = new MuranoTokenType("LBRAKETS_TOKEN");
   IElementType LPAREN_TOKEN = new MuranoTokenType("LPAREN_TOKEN");
   IElementType LSQBR_TOKEN = new MuranoTokenType("LSQBR_TOKEN");

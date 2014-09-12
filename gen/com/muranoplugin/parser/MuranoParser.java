@@ -83,6 +83,9 @@ public class MuranoParser implements PsiParser {
     else if (root_ == EXTENDS_STATEMENT) {
       result_ = extendsStatement(builder_, 0);
     }
+    else if (root_ == FOR_STATEMENT) {
+      result_ = forStatement(builder_, 0);
+    }
     else if (root_ == FQDN) {
       result_ = fqdn(builder_, 0);
     }
@@ -110,6 +113,12 @@ public class MuranoParser implements PsiParser {
     else if (root_ == INDEXED_EXPRESSION) {
       result_ = indexedExpression(builder_, 0);
     }
+    else if (root_ == LIST_ELEM) {
+      result_ = list_elem(builder_, 0);
+    }
+    else if (root_ == LIST_OF_EXPR) {
+      result_ = list_of_expr(builder_, 0);
+    }
     else if (root_ == LVALUE) {
       result_ = lvalue(builder_, 0);
     }
@@ -130,6 +139,9 @@ public class MuranoParser implements PsiParser {
     }
     else if (root_ == METHOD_ITEMS) {
       result_ = methodItems(builder_, 0);
+    }
+    else if (root_ == METHOD_USAGE_STATEMENT) {
+      result_ = methodUsageStatement(builder_, 0);
     }
     else if (root_ == METHOD_CALL_EXPRESSION) {
       result_ = method_callExpression(builder_, 0);
@@ -383,7 +395,7 @@ public class MuranoParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // FN_NEW_TOKEN | FN_FORMAT_TOKEN |FN_DICT_TOKEN
+  // FN_NEW_TOKEN | FN_FORMAT_TOKEN |FN_DICT_TOKEN | FN_JOIN_TOKEN
   static boolean builtin_functions(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "builtin_functions")) return false;
     boolean result_;
@@ -391,6 +403,7 @@ public class MuranoParser implements PsiParser {
     result_ = consumeToken(builder_, FN_NEW_TOKEN);
     if (!result_) result_ = consumeToken(builder_, FN_FORMAT_TOKEN);
     if (!result_) result_ = consumeToken(builder_, FN_DICT_TOKEN);
+    if (!result_) result_ = consumeToken(builder_, FN_JOIN_TOKEN);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }
@@ -562,15 +575,26 @@ public class MuranoParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // CONTRACT_TOKEN expression
+  // CONTRACT_TOKEN (list_of_expr | expression)
   public static boolean contractStatement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "contractStatement")) return false;
     if (!nextTokenIs(builder_, CONTRACT_TOKEN)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, CONTRACT_TOKEN);
-    result_ = result_ && expression(builder_, level_ + 1);
+    result_ = result_ && contractStatement_1(builder_, level_ + 1);
     exit_section_(builder_, marker_, CONTRACT_STATEMENT, result_);
+    return result_;
+  }
+
+  // list_of_expr | expression
+  private static boolean contractStatement_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "contractStatement_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = list_of_expr(builder_, level_ + 1);
+    if (!result_) result_ = expression(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -662,6 +686,21 @@ public class MuranoParser implements PsiParser {
   }
 
   /* ********************************************************** */
+  // FOR_TOKEN ID IN_TOKEN expression DO_TOKEN body
+  public static boolean forStatement(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "forStatement")) return false;
+    if (!nextTokenIs(builder_, FOR_TOKEN)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeTokens(builder_, 0, FOR_TOKEN, ID, IN_TOKEN);
+    result_ = result_ && expression(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, DO_TOKEN);
+    result_ = result_ && body(builder_, level_ + 1);
+    exit_section_(builder_, marker_, FOR_STATEMENT, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // ID ('.' ID)*
   public static boolean fqdn(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "fqdn")) return false;
@@ -698,14 +737,26 @@ public class MuranoParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // builtin_functions | ID
+  // builtin_functions | ID | STRING DOT_TOKEN builtin_functions
   public static boolean function_name(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "function_name")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<function name>");
     result_ = builtin_functions(builder_, level_ + 1);
     if (!result_) result_ = consumeToken(builder_, ID);
+    if (!result_) result_ = function_name_2(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, FUNCTION_NAME, result_, false, null);
+    return result_;
+  }
+
+  // STRING DOT_TOKEN builtin_functions
+  private static boolean function_name_2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "function_name_2")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeTokens(builder_, 0, STRING, DOT_TOKEN);
+    result_ = result_ && builtin_functions(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -828,6 +879,43 @@ public class MuranoParser implements PsiParser {
   }
 
   /* ********************************************************** */
+  // INDENT expression
+  public static boolean list_elem(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "list_elem")) return false;
+    if (!nextTokenIs(builder_, INDENT)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, INDENT);
+    result_ = result_ && expression(builder_, level_ + 1);
+    exit_section_(builder_, marker_, LIST_ELEM, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // list_elem list_of_expr | list_elem
+  public static boolean list_of_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "list_of_expr")) return false;
+    if (!nextTokenIs(builder_, INDENT)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = list_of_expr_0(builder_, level_ + 1);
+    if (!result_) result_ = list_elem(builder_, level_ + 1);
+    exit_section_(builder_, marker_, LIST_OF_EXPR, result_);
+    return result_;
+  }
+
+  // list_elem list_of_expr
+  private static boolean list_of_expr_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "list_of_expr_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = list_elem(builder_, level_ + 1);
+    result_ = result_ && list_of_expr(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // numberLiteralExpression | booleanLiteralExpression | textLiteralExpression
   static boolean literals(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "literals")) return false;
@@ -894,13 +982,13 @@ public class MuranoParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // argumentsStatement | bodyStatement
+  // methodUsageStatement | argumentsStatement | bodyStatement
   public static boolean methodComponent(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "methodComponent")) return false;
-    if (!nextTokenIs(builder_, "<method component>", ARGUMENTS_TOKEN, BODY_TOKEN)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<method component>");
-    result_ = argumentsStatement(builder_, level_ + 1);
+    result_ = methodUsageStatement(builder_, level_ + 1);
+    if (!result_) result_ = argumentsStatement(builder_, level_ + 1);
     if (!result_) result_ = bodyStatement(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, METHOD_COMPONENT, result_, false, null);
     return result_;
@@ -968,6 +1056,18 @@ public class MuranoParser implements PsiParser {
   }
 
   /* ********************************************************** */
+  // USAGE_TOKEN ACTION_TOKEN
+  public static boolean methodUsageStatement(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "methodUsageStatement")) return false;
+    if (!nextTokenIs(builder_, USAGE_TOKEN)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeTokens(builder_, 0, USAGE_TOKEN, ACTION_TOKEN);
+    exit_section_(builder_, marker_, METHOD_USAGE_STATEMENT, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // (this_property | variable | function_name) LPAREN_TOKEN expr_list RPAREN_TOKEN sub_method
   public static boolean method_callExpression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "method_callExpression")) return false;
@@ -1010,7 +1110,7 @@ public class MuranoParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // muranoplStatement muranopl | (muranoplStatement | EOF) |
+  // muranoplStatement muranopl | (muranoplStatement | EOL |EOF) |
   public static boolean muranopl(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "muranopl")) return false;
     boolean result_;
@@ -1033,12 +1133,13 @@ public class MuranoParser implements PsiParser {
     return result_;
   }
 
-  // muranoplStatement | EOF
+  // muranoplStatement | EOL |EOF
   private static boolean muranopl_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "muranopl_1")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = muranoplStatement(builder_, level_ + 1);
+    if (!result_) result_ = consumeToken(builder_, EOL);
     if (!result_) result_ = consumeToken(builder_, EOF);
     exit_section_(builder_, marker_, null, result_);
     return result_;
@@ -1324,19 +1425,31 @@ public class MuranoParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // (INDENT (returnExpression| conditionalStatement | assignmentStatement | method_callExpression )) | commentStatement
+  // (INDENT (returnExpression|
+  //                        conditionalStatement |
+  //                        forStatement |
+  //                        assignmentStatement |
+  //                        method_callExpression )) |
+  //                        commentStatement|
+  //                        EOL | EOF | NEWLINE
   public static boolean statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
-    if (!nextTokenIs(builder_, "<statement>", COMMENT_TOKEN, INDENT)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<statement>");
     result_ = statement_0(builder_, level_ + 1);
     if (!result_) result_ = commentStatement(builder_, level_ + 1);
+    if (!result_) result_ = consumeToken(builder_, EOL);
+    if (!result_) result_ = consumeToken(builder_, EOF);
+    if (!result_) result_ = consumeToken(builder_, NEWLINE);
     exit_section_(builder_, level_, marker_, STATEMENT, result_, false, null);
     return result_;
   }
 
-  // INDENT (returnExpression| conditionalStatement | assignmentStatement | method_callExpression )
+  // INDENT (returnExpression|
+  //                        conditionalStatement |
+  //                        forStatement |
+  //                        assignmentStatement |
+  //                        method_callExpression )
   private static boolean statement_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement_0")) return false;
     boolean result_;
@@ -1347,13 +1460,18 @@ public class MuranoParser implements PsiParser {
     return result_;
   }
 
-  // returnExpression| conditionalStatement | assignmentStatement | method_callExpression
+  // returnExpression|
+  //                        conditionalStatement |
+  //                        forStatement |
+  //                        assignmentStatement |
+  //                        method_callExpression
   private static boolean statement_0_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement_0_1")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = returnExpression(builder_, level_ + 1);
     if (!result_) result_ = conditionalStatement(builder_, level_ + 1);
+    if (!result_) result_ = forStatement(builder_, level_ + 1);
     if (!result_) result_ = assignmentStatement(builder_, level_ + 1);
     if (!result_) result_ = method_callExpression(builder_, level_ + 1);
     exit_section_(builder_, marker_, null, result_);

@@ -48,8 +48,20 @@ public class MuranoStatementImpl extends ASTWrapperPsiElement implements MuranoS
 
   @Override
   @Nullable
+  public MuranoForStatement getForStatement() {
+    return findChildByClass(MuranoForStatement.class);
+  }
+
+  @Override
+  @Nullable
   public PsiElement getIndent() {
     return findChildByType(INDENT);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getNewline() {
+    return findChildByType(NEWLINE);
   }
 
   public void setIndent() {

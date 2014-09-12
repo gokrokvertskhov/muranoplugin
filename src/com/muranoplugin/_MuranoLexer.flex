@@ -18,12 +18,12 @@ import static com.muranoplugin.psi.MuranoTypes.*;
 %type IElementType
 %unicode
 
-EOL="\r"|"\n"|"\r\n"
+EOL=[\r\n]*
 LINE_WS=[\ \t\f]
 WHITE_SPACE=({LINE_WS}|{EOL})+
 
 STRING=('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")
-COMMENT_TOKEN=[ \t\n\x0B\f\r]*#[\p[:letter:]\,\.\:\$\(\) \t]*
+COMMENT_TOKEN=[ \t\n\x0B\f\r]*#[\p[:letter:]\p[:digit:]\-\+\$\:\.\,\(\)'\{\}\=\_\^\*\-\+\/\\ \t]*
 NUMBER=[0-9]+(\.[0-9]*)?
 PROPERTIES_TOKEN=[ \t\n\x0B\f\r]*Properties:
 USAGE_IN_TOKEN=[ \t\n\x0B\f\r]+In[ \t\n\x0B\f\r]+
@@ -35,6 +35,9 @@ THEN_TOKEN=[ \t\n\x0B\f\r]*Then\:
 MAP_TOKEN=[ \t\n\x0B\f\r]*=>[ \t\n\x0B\f\r]*
 INDENT=[ \t\n\x0B\f\r]+\-[ \t\n\x0B\f\r]+
 NULL_TOKEN=[ \t\n\x0B\f\r]*null[ \t]*
+FOR_TOKEN=[ \t\n\x0B\f\r]*For\:[ \t\n\x0B\f\r]*
+IN_TOKEN=[ \t\n\x0B\f\r]*In\:[ \t\n\x0B\f\r]*
+DO_TOKEN=[ \t\n\x0B\f\r]*Do\:[ \t\n\x0B\f\r]
 DEFAULTNS_TOKEN=[ \t\n\x0B\f\r]+\=\:[ \t\n\x0B\f\r]+
 ASSIGN_TOKEN=[ \t\n\x0B\f\r]*\:[ \t]*
 LPAREN_TOKEN=[ \t\n\x0B\f\r]*\([ \t\n\x0B\f\r]*
@@ -62,12 +65,13 @@ OP_N=[ \t\n\x0B\f\r]*\![ \t\n\x0B\f\r]*
 FN_NEW_TOKEN=[ \t\n\x0B\f\r]*new
 FN_FORMAT_TOKEN=[ \t\n\x0B\f\r]*format
 FN_DICT_TOKEN=[ \t\n\x0B\f\r]*dict
+FN_JOIN_TOKEN=[ \t\n\x0B\f\r]*join
 HRESOURCES_TOKEN=[ \t\n\x0B\f\r]+resources\:[ \t\n\x0B\f\r]*
 HTYPE_TOKEN=[ \t\n\x0B\f\r]type\:[ \t\n\x0B\f\r]*
 HPROPERTIES_TOKEN=[ \t\n\x0B\f\r]*properties\:[ \t\n\x0B\f\r]*
 HOUTPUTS_TOKEN=[ \t\n\x0B\f\r]+outputs\:[ \t\n\x0B\f\r]*
 HVALUE_TOKEN=[ \t\n\x0B\f\r]+value\:[ \t\n\x0B\f\r]+
-ID=[\p[:letter:]\_]*
+ID=[\p[:letter:]\p[:digit:]\_]*
 
 %%
 <YYINITIAL> {
@@ -90,10 +94,12 @@ ID=[\p[:letter:]\_]*
   "False"                    { return BOOL_TOKEN_F; }
   "true"                     { return MPL_BOOL_TRUE; }
   "false"                    { return MPL_BOOL_FALSE; }
+  "Action"                   { return ACTION_TOKEN; }
   "$"                        { return DOLLAR_TOKEN; }
   "."                        { return DOT_TOKEN; }
   "!"                        { return OP_NEG; }
   "EOF"                      { return EOF; }
+  "EOL"                      { return EOL; }
 
   {STRING}                   { return STRING; }
   {COMMENT_TOKEN}            { return COMMENT_TOKEN; }
@@ -108,6 +114,9 @@ ID=[\p[:letter:]\_]*
   {MAP_TOKEN}                { return MAP_TOKEN; }
   {INDENT}                   { return INDENT; }
   {NULL_TOKEN}               { return NULL_TOKEN; }
+  {FOR_TOKEN}                { return FOR_TOKEN; }
+  {IN_TOKEN}                 { return IN_TOKEN; }
+  {DO_TOKEN}                 { return DO_TOKEN; }
   {DEFAULTNS_TOKEN}          { return DEFAULTNS_TOKEN; }
   {ASSIGN_TOKEN}             { return ASSIGN_TOKEN; }
   {LPAREN_TOKEN}             { return LPAREN_TOKEN; }
@@ -135,6 +144,7 @@ ID=[\p[:letter:]\_]*
   {FN_NEW_TOKEN}             { return FN_NEW_TOKEN; }
   {FN_FORMAT_TOKEN}          { return FN_FORMAT_TOKEN; }
   {FN_DICT_TOKEN}            { return FN_DICT_TOKEN; }
+  {FN_JOIN_TOKEN}            { return FN_JOIN_TOKEN; }
   {HRESOURCES_TOKEN}         { return HRESOURCES_TOKEN; }
   {HTYPE_TOKEN}              { return HTYPE_TOKEN; }
   {HPROPERTIES_TOKEN}        { return HPROPERTIES_TOKEN; }

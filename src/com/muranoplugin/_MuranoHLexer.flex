@@ -23,7 +23,7 @@ LINE_WS=[\ \t\f]
 WHITE_SPACE=({LINE_WS}|{EOL})+
 
 STRING=('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")
-COMMENT_TOKEN=[ \t\n\x0B\f\r]*#[\p[:letter:]\:\$\.\,\(\)\* \t]*
+COMMENT_TOKEN=[ \t\n\x0B\f\r]*#[\p[:letter:]\p[:digit:]\-\+\$\:\.\,\(\)'\{\}\=\_\^\*\-\+\/\\ \t]*
 NUMBER=[0-9]+(\.[0-9]*)?
 FN_SETATTR_TOKEN=\$\.setAttr\(
 FN_GETATTR_TOKEN=\$\.getAttr\(
@@ -40,6 +40,9 @@ USAGE_INOUT_TOKEN=[ \t\n\x0B\f\r]+InOut[ \t\n\x0B\f\r]+
 USAGE_RUNTIME_TOKEN=[ \t\n\x0B\f\r]+Runtime[ \t\n\x0B\f\r]+
 IF_TOKEN=[ \t\n\x0B\f\r]*If\:[ \t\n\x0B\f\r]*
 THEN_TOKEN=[ \t\n\x0B\f\r]*Then\:
+FOR_TOKEN=[ \t\n\x0B\f\r]*For\:[ \t\n\x0B\f\r]*
+IN_TOKEN=[ \t\n\x0B\f\r]*In\:[ \t\n\x0B\f\r]*
+DO_TOKEN=[ \t\n\x0B\f\r]*Do\:[ \t\n\x0B\f\r]
 MAP_TOKEN=[ \t\n\x0B\f\r]*=>[ \t\n\x0B\f\r]*
 INDENT=[ \t\n\x0B\f\r]+\-[ \t\n\x0B\f\r]+
 NULL_TOKEN=[ \t\n\x0B\f\r]*null[ \t]*
@@ -103,6 +106,7 @@ ID=[\p[:letter:]\_]*
   "False"                    { return BOOL_TOKEN_F; }
   "true"                     { return MPL_BOOL_TRUE; }
   "false"                    { return MPL_BOOL_FALSE; }
+  "Action"                   { return ACTION_TOKEN; }
   "$"                        { return DOLLAR_TOKEN; }
   "."                        { return DOT_TOKEN; }
   "!"                        { return OP_NEG; }
@@ -125,6 +129,9 @@ ID=[\p[:letter:]\_]*
   {USAGE_RUNTIME_TOKEN}      { return USAGE_RUNTIME_TOKEN; }
   {IF_TOKEN}                 { return IF_TOKEN; }
   {THEN_TOKEN}               { return THEN_TOKEN; }
+  {FOR_TOKEN}                { return FOR_TOKEN; }
+  {IN_TOKEN}                 { return IN_TOKEN; }
+  {DO_TOKEN}                 { return DO_TOKEN; }
   {MAP_TOKEN}                { return MAP_TOKEN; }
   {INDENT}                   { return INDENT; }
   {NULL_TOKEN}               { return NULL_TOKEN; }

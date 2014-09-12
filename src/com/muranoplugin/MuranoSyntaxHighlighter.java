@@ -84,6 +84,10 @@ public class MuranoSyntaxHighlighter extends SyntaxHighlighterBase {
         HIGHLIGHT_CLASSES.put(MuranoTypes.IF_TOKEN, ENUM_KEYS);
         HIGHLIGHT_CLASSES.put(MuranoTypes.THEN_TOKEN, ENUM_KEYS);
         HIGHLIGHT_CLASSES.put(MuranoTypes.ELSE_TOKEN, ENUM_KEYS);
+        HIGHLIGHT_CLASSES.put(MuranoTypes.FOR_TOKEN, ENUM_KEYS);
+        HIGHLIGHT_CLASSES.put(MuranoTypes.IN_TOKEN, ENUM_KEYS);
+        HIGHLIGHT_CLASSES.put(MuranoTypes.DO_TOKEN, ENUM_KEYS);
+
 
         //Comments
         HIGHLIGHT_CLASSES.put(MuranoTypes.COMMENT_TOKEN, COMMENT_KEYS);

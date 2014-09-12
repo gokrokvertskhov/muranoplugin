@@ -36,6 +36,12 @@ public class MuranoFunctionNameImpl extends ASTWrapperPsiElement implements Mura
 
   @Override
   @Nullable
+  public PsiElement getFnJoinToken() {
+    return findChildByType(FN_JOIN_TOKEN);
+  }
+
+  @Override
+  @Nullable
   public PsiElement getFnNewToken() {
     return findChildByType(FN_NEW_TOKEN);
   }

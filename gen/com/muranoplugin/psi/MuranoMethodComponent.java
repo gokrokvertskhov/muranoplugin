@@ -13,4 +13,7 @@ public interface MuranoMethodComponent extends PsiElement {
   @Nullable
   MuranoBodyStatement getBodyStatement();
 
+  @Nullable
+  MuranoMethodUsageStatement getMethodUsageStatement();
+
 }

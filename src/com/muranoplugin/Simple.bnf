@@ -19,7 +19,7 @@
 
   tokens=[
     string="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")"
-    COMMENT_TOKEN='regexp:\s*#[\w \t]*'
+    COMMENT_TOKEN="regexp:\s*#[\w\-\+\$\:\.\,\(\)\'\{\}\=\_\^\*\-\+\/\\ \t]*"
     number='regexp:\d+(\.\d*)?'
    NAMESPACE_TOKEN='Namespaces:'
    NAME_TOKEN="Name:"
@@ -49,6 +49,10 @@
    INDENT="regexp:^\s+\-\s+"
    //INDENT2="regexp:^\s+"
    NULL_TOKEN="regexp:\s*null[ \t]*"
+   FOR_TOKEN="regexp:\s*For\:\s*"
+   IN_TOKEN="regexp:\s*In\:\s*"
+   DO_TOKEN="regexp:\s*Do\:\s"
+   ACTION_TOKEN="Action"
 
 
    //METHOD_CALL2='regexp:\p{Alpha}+\('
@@ -93,6 +97,7 @@
    FN_NEW_TOKEN="regexp:\s*new"
    FN_FORMAT_TOKEN="regexp:\s*format"
    FN_DICT_TOKEN="regexp:\s*dict"
+   FN_JOIN_TOKEN="regexp:\s*join"
 
 //Heat
 
@@ -111,12 +116,18 @@
 root ::=  muranopl
 
 muranoplStatement ::= namespacesStatement | classStatement | commentStatement
-muranopl ::= muranoplStatement muranopl | (muranoplStatement | EOF) |
+muranopl ::= muranoplStatement muranopl | (muranoplStatement | EOL |EOF) |
 body ::= statement body | statement?
 
 non_list_body ::= non_list_statememnt non_list_body | //Only for Heat resources
 
-statement ::= (INDENT (returnExpression| conditionalStatement | assignmentStatement | method_callExpression )) | commentStatement {
+statement ::= (INDENT (returnExpression|
+                       conditionalStatement |
+                       forStatement |
+                       assignmentStatement |
+                       method_callExpression )) |
+                       commentStatement|
+                       EOL | EOF | NEWLINE {
  /* check_indent */
  methods=[ setIndent
            checkIndent
@@ -133,6 +144,10 @@ non_list_statememnt ::= ( heatExpression|
 heatSimpleStatement ::= lvalue ASSIGN_TOKEN | ID ASSIGN_TOKEN
 
 conditionalStatement ::= IF_TOKEN expression THEN_TOKEN body (ELSE_TOKEN body)?{ /* ++indent */ }
+
+forStatement ::= FOR_TOKEN ID IN_TOKEN expression DO_TOKEN body {
+  mixin="com.muranoplugin.psi.impl.MuranoForStatementMixin"
+}
 
 assignmentStatement ::= lvalue ASSIGN_TOKEN expression {
 mixin="com.muranoplugin.psi.impl.MuranoAssignMixin"
@@ -179,9 +194,9 @@ methods=[
 ]
 }
 
-function_name ::= builtin_functions | ID
+function_name ::= builtin_functions | ID | STRING DOT_TOKEN builtin_functions
 
-private builtin_functions ::= FN_NEW_TOKEN | FN_FORMAT_TOKEN |FN_DICT_TOKEN
+private builtin_functions ::= FN_NEW_TOKEN | FN_FORMAT_TOKEN |FN_DICT_TOKEN | FN_JOIN_TOKEN
 
 sub_method ::= DOT_TOKEN ID sub_property LPAREN_TOKEN expr_list? RPAREN_TOKEN sub_method | DOT_TOKEN ID sub_property LPAREN_TOKEN expr_list? RPAREN_TOKEN |
 
@@ -262,7 +277,9 @@ propertyItem ::=ID ASSIGN_TOKEN propertyItemElems {
 propertyItemElem ::= contractStatement | defaultStatement | usageStatement |
 propertyItemElems ::= propertyItemElem propertyItemElems | propertyItemElem
 propertiesItems ::= propertyItem propertiesItems | propertyItem |
-contractStatement ::= CONTRACT_TOKEN expression
+contractStatement ::= CONTRACT_TOKEN (list_of_expr | expression)
+list_of_expr ::= list_elem list_of_expr | list_elem
+list_elem ::= INDENT expression
 defaultStatement ::= DEFAULT_TOKEN expression
 usageStatement ::= USAGE_TOKEN (USAGE_IN_TOKEN |
                                 USAGE_OUT_TOKEN|
@@ -274,10 +291,10 @@ methodItem ::=ID ASSIGN_TOKEN methodComponents {
   mixin="com.muranoplugin.psi.impl.MuranoMethodMixin"
   methods=[getName="ID[0]"]
 }
-methodComponent ::= argumentsStatement | bodyStatement
+methodComponent ::= methodUsageStatement | argumentsStatement | bodyStatement
 methodComponents ::=methodComponent methodComponents | methodComponent |
 methodItems ::= methodItem methodItems | methodItem |
-
+methodUsageStatement ::= USAGE_TOKEN ACTION_TOKEN
 argumentsStatement ::= ARGUMENTS_TOKEN propertiesItems
 
 bodyStatement ::= BODY_TOKEN body

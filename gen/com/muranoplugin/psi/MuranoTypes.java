@@ -29,6 +29,7 @@ public interface MuranoTypes {
   IElementType EXPRESSION = new MuranoElementType("EXPRESSION");
   IElementType EXPR_LIST = new MuranoElementType("EXPR_LIST");
   IElementType EXTENDS_STATEMENT = new MuranoElementType("EXTENDS_STATEMENT");
+  IElementType FOR_STATEMENT = new MuranoElementType("FOR_STATEMENT");
   IElementType FQDN = new MuranoElementType("FQDN");
   IElementType FUNCTION_NAME = new MuranoElementType("FUNCTION_NAME");
   IElementType HEAT_ASSIGNMENT_STATEMENT = new MuranoElementType("HEAT_ASSIGNMENT_STATEMENT");
@@ -38,6 +39,8 @@ public interface MuranoTypes {
   IElementType HEAT_SIMPLE_STATEMENT = new MuranoElementType("HEAT_SIMPLE_STATEMENT");
   IElementType HEAT_VALUE_STATEMENT = new MuranoElementType("HEAT_VALUE_STATEMENT");
   IElementType INDEXED_EXPRESSION = new MuranoElementType("INDEXED_EXPRESSION");
+  IElementType LIST_ELEM = new MuranoElementType("LIST_ELEM");
+  IElementType LIST_OF_EXPR = new MuranoElementType("LIST_OF_EXPR");
   IElementType LVALUE = new MuranoElementType("LVALUE");
   IElementType MAP_ENTRY_ELEMENT = new MuranoElementType("MAP_ENTRY_ELEMENT");
   IElementType MAP_EXPRESSION = new MuranoElementType("MAP_EXPRESSION");
@@ -46,6 +49,7 @@ public interface MuranoTypes {
   IElementType METHOD_COMPONENTS = new MuranoElementType("METHOD_COMPONENTS");
   IElementType METHOD_ITEM = new MuranoElementType("METHOD_ITEM");
   IElementType METHOD_ITEMS = new MuranoElementType("METHOD_ITEMS");
+  IElementType METHOD_USAGE_STATEMENT = new MuranoElementType("METHOD_USAGE_STATEMENT");
   IElementType MURANOPL = new MuranoElementType("MURANOPL");
   IElementType MURANOPL_STATEMENT = new MuranoElementType("MURANOPL_STATEMENT");
   IElementType NAMEPSACED_CLASS = new MuranoElementType("NAMEPSACED_CLASS");
@@ -72,6 +76,7 @@ public interface MuranoTypes {
   IElementType VARIABLE = new MuranoElementType("VARIABLE");
   IElementType WORKFLOWS_STATEMENT = new MuranoElementType("WORKFLOWS_STATEMENT");
 
+  IElementType ACTION_TOKEN = new MuranoTokenType("Action");
   IElementType ARGUMENTS_TOKEN = new MuranoTokenType("Arguments:");
   IElementType ASSIGN_TOKEN = new MuranoTokenType("ASSIGN_TOKEN");
   IElementType BODY_TOKEN = new MuranoTokenType("Body:");
@@ -86,13 +91,17 @@ public interface MuranoTypes {
   IElementType DEFAULT_TOKEN = new MuranoTokenType("Default:");
   IElementType DOLLAR_TOKEN = new MuranoTokenType("$");
   IElementType DOT_TOKEN = new MuranoTokenType(".");
+  IElementType DO_TOKEN = new MuranoTokenType("DO_TOKEN");
   IElementType ELSE_TOKEN = new MuranoTokenType("Else:");
   IElementType EOF = new MuranoTokenType("EOF");
+  IElementType EOL = new MuranoTokenType("EOL");
   IElementType EXPR_LIST_2_0 = new MuranoTokenType("expr_list_2_0");
   IElementType EXTENDS_TOKEN = new MuranoTokenType("Extends:");
   IElementType FN_DICT_TOKEN = new MuranoTokenType("FN_DICT_TOKEN");
   IElementType FN_FORMAT_TOKEN = new MuranoTokenType("FN_FORMAT_TOKEN");
+  IElementType FN_JOIN_TOKEN = new MuranoTokenType("FN_JOIN_TOKEN");
   IElementType FN_NEW_TOKEN = new MuranoTokenType("FN_NEW_TOKEN");
+  IElementType FOR_TOKEN = new MuranoTokenType("FOR_TOKEN");
   IElementType HOUTPUTS_TOKEN = new MuranoTokenType("HOUTPUTS_TOKEN");
   IElementType HPROPERTIES_TOKEN = new MuranoTokenType("HPROPERTIES_TOKEN");
   IElementType HRESOURCES_TOKEN = new MuranoTokenType("HRESOURCES_TOKEN");
@@ -101,6 +110,7 @@ public interface MuranoTypes {
   IElementType ID = new MuranoTokenType("ID");
   IElementType IF_TOKEN = new MuranoTokenType("IF_TOKEN");
   IElementType INDENT = new MuranoTokenType("INDENT");
+  IElementType IN_TOKEN = new MuranoTokenType("IN_TOKEN");
   IElementType LBRAKETS_TOKEN = new MuranoTokenType("LBRAKETS_TOKEN");
   IElementType LPAREN_TOKEN = new MuranoTokenType("LPAREN_TOKEN");
   IElementType LSQBR_TOKEN = new MuranoTokenType("LSQBR_TOKEN");
@@ -219,6 +229,9 @@ public interface MuranoTypes {
       else if (type == EXTENDS_STATEMENT) {
         return new MuranoExtendsStatementImpl(node);
       }
+      else if (type == FOR_STATEMENT) {
+        return new MuranoForStatementImpl(node);
+      }
       else if (type == FQDN) {
         return new MuranoFqdnImpl(node);
       }
@@ -246,6 +259,12 @@ public interface MuranoTypes {
       else if (type == INDEXED_EXPRESSION) {
         return new MuranoIndexedExpressionImpl(node);
       }
+      else if (type == LIST_ELEM) {
+        return new MuranoListElemImpl(node);
+      }
+      else if (type == LIST_OF_EXPR) {
+        return new MuranoListOfExprImpl(node);
+      }
       else if (type == LVALUE) {
         return new MuranoLvalueImpl(node);
       }
@@ -269,6 +288,9 @@ public interface MuranoTypes {
       }
       else if (type == METHOD_ITEMS) {
         return new MuranoMethodItemsImpl(node);
+      }
+      else if (type == METHOD_USAGE_STATEMENT) {
+        return new MuranoMethodUsageStatementImpl(node);
       }
       else if (type == MURANOPL) {
         return new MuranoMuranoplImpl(node);

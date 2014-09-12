@@ -23,9 +23,15 @@ public class MuranoContractStatementImpl extends ASTWrapperPsiElement implements
   }
 
   @Override
-  @NotNull
+  @Nullable
   public MuranoExpression getExpression() {
-    return findNotNullChildByClass(MuranoExpression.class);
+    return findChildByClass(MuranoExpression.class);
+  }
+
+  @Override
+  @Nullable
+  public MuranoListOfExpr getListOfExpr() {
+    return findChildByClass(MuranoListOfExpr.class);
   }
 
 }
